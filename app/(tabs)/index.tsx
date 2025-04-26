@@ -1,74 +1,95 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createDrawerNavigator } from '@react-navigation/drawer';
+import { DrawerActions } from '@react-navigation/native'; // Changed import source
+import { Ionicons } from '@expo/vector-icons';
+import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
+import HomeStack from './HomeStack';
+import BrowseStack from './BrowseStack';
+import ProfileScreen from './Profile';
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+const Drawer = createDrawerNavigator();
 
-export default function HomeScreen() {
+const App = () => {
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <NavigationContainer>
+      <Drawer.Navigator
+        screenOptions={{
+          drawerStyle: {
+            backgroundColor: '#1f1f1f',
+            width: 240,
+          },
+          drawerActiveTintColor: '#E50914',
+          drawerInactiveTintColor: '#fff',
+          headerShown: false,
+        }}
+        drawerContent={(props) => {
+          const navigateToSection = (screen: string) => {
+            props.navigation.navigate(screen);
+          };
+          const scrollToGenre = (genre: string) => {
+            props.navigation.navigate('HomeStack', { screen: 'HomeFeed', params: { scrollTo: genre } });
+            props.navigation.dispatch(DrawerActions.closeDrawer());
+          };
+
+          return (
+            <View style={styles.drawerContainer}>
+              <TouchableOpacity style={styles.drawerItem} onPress={() => navigateToSection('HomeStack')}>
+                <Text style={[styles.drawerText, props.navigation.isFocused() ? styles.activeText : null]}>Home</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.drawerItem} onPress={() => navigateToSection('BrowseStack')}>
+                <Text style={[styles.drawerText, props.navigation.isFocused() ? styles.activeText : null]}>Browse</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.drawerItem} onPress={() => navigateToSection('Profile')}>
+                <Text style={[styles.drawerText, props.navigation.isFocused() ? styles.activeText : null]}>Profile</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.drawerItem} onPress={() => scrollToGenre('Trending Now')}>
+                <Text style={[styles.drawerText, props.navigation.isFocused() ? styles.activeText : null]}>Trending</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.drawerItem} onPress={() => scrollToGenre('Action')}>
+                <Text style={[styles.drawerText, props.navigation.isFocused() ? styles.activeText : null]}>Action</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.drawerItem} onPress={() => scrollToGenre('Comedy')}>
+                <Text style={[styles.drawerText, props.navigation.isFocused() ? styles.activeText : null]}>Comedy</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.drawerItem} onPress={() => scrollToGenre('Drama')}>
+                <Text style={[styles.drawerText, props.navigation.isFocused() ? styles.activeText : null]}>Drama</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.drawerItem} onPress={() => scrollToGenre('Sci-Fi')}>
+                <Text style={[styles.drawerText, props.navigation.isFocused() ? styles.activeText : null]}>Sci-Fi</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.drawerItem} onPress={() => scrollToGenre('Horror')}>
+                <Text style={[styles.drawerText, props.navigation.isFocused() ? styles.activeText : null]}>Horror</Text>
+              </TouchableOpacity>
+            </View>
+          );
+        }}
+      >
+        <Drawer.Screen name="HomeStack" component={HomeStack} />
+        <Drawer.Screen name="BrowseStack" component={BrowseStack} />
+        <Drawer.Screen name="Profile" component={ProfileScreen} />
+      </Drawer.Navigator>
+    </NavigationContainer>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
+  drawerContainer: {
+    flex: 1,
+    paddingTop: 20,
+  } as const,
+  drawerItem: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#333',
+  } as const,
+  drawerText: {
+    color: '#fff',
+    fontSize: 18,
+  } as const,
+  activeText: {
+    color: '#E50914',
+  } as const,
 });
+
+export default App;
