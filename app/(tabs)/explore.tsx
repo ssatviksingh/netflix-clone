@@ -1,21 +1,46 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet, Dimensions, ActivityIndicator } from 'react-native';
-import { useNavigation, NavigationProp } from '@react-navigation/native';
-import { StackParamList } from './BrowseStack';
-import { getPopularMovies } from '../../api/movieService';
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+  Dimensions,
+  ActivityIndicator,
+  TextInput,
+} from "react-native";
+import { useNavigation, NavigationProp } from "@react-navigation/native";
+import { StackParamList } from "./BrowseStack";
+import { getPopularMovies } from "../../api/movieService";
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 
-const MovieItem = ({ item }: { item: { id: string; title: string; thumbnail: string; description: string; videoUrl: string } }) => {
+const MovieItem = ({
+  item,
+}: {
+  item: {
+    id: string;
+    title: string;
+    thumbnail: string;
+    description: string;
+    videoUrl: string | null;
+  };
+}) => {
   const navigation = useNavigation<NavigationProp<StackParamList>>();
   return (
     <TouchableOpacity
       style={styles.movieItem}
-      onPress={() => navigation.navigate('MovieDetail', { movie: item })}
+      onPress={() => navigation.navigate("MovieDetail", { movie: item })}
     >
       <Image source={{ uri: item.thumbnail }} style={styles.movieThumbnail} />
-      <Text style={styles.movieTitle} numberOfLines={1}>{item.title}</Text>
-      <TouchableOpacity style={styles.playButton} onPress={() => navigation.navigate('MovieDetail', { movie: item })}>
+      <Text style={styles.movieTitle} numberOfLines={1}>
+        {item.title}
+      </Text>
+      <TouchableOpacity
+        style={styles.playButton}
+        onPress={() => navigation.navigate("MovieDetail", { movie: item })}
+      >
         <Text style={styles.playButtonText}>Play</Text>
       </TouchableOpacity>
     </TouchableOpacity>
@@ -24,56 +49,60 @@ const MovieItem = ({ item }: { item: { id: string; title: string; thumbnail: str
 
 const ExploreScreen = () => {
   const navigation = useNavigation<NavigationProp<StackParamList>>();
-  const [movies, setMovies] = useState<{ id: string; title: string; thumbnail: string; description: string; videoUrl: string }[]>([]);
+  const [movies, setMovies] = useState<
+    {
+      id: string;
+      title: string;
+      thumbnail: string;
+      description: string;
+      videoUrl: string | null;
+    }[]
+  >([]);
+  const [filteredMovies, setFilteredMovies] = useState<
+    {
+      id: string;
+      title: string;
+      thumbnail: string;
+      description: string;
+      videoUrl: string | null;
+    }[]
+  >([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const fetchMovies = async () => {
       setLoading(true);
+      setError(false);
       try {
         const popularMovies = await getPopularMovies();
         if (!popularMovies || popularMovies.length === 0) {
-          const mockedMovies = [
-            { id: '1', title: 'Captain America: Brave New World', thumbnail: 'https://picsum.photos/200/300?random=1', description: 'Superhero action', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4' },
-            { id: '2', title: 'Sonic the Hedgehog 3', thumbnail: 'https://picsum.photos/200/300?random=2', description: 'Animated adventure', videoUrl: 'https://assets.mixkit.co/videos/download/mixkit-countryside-meadow-4075.mp4' },
-            { id: '3', title: 'Mad Max: Fury Road', thumbnail: 'https://picsum.photos/200/300?random=3', description: 'Post-apocalyptic action', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4' },
-            { id: '4', title: 'John Wick 4', thumbnail: 'https://picsum.photos/200/300?random=4', description: 'Action thriller', videoUrl: 'https://assets.mixkit.co/videos/download/mixkit-waves-in-the-ocean-1164.mp4' },
-            { id: '5', title: 'The Hangover', thumbnail: 'https://picsum.photos/200/300?random=5', description: 'Hilarious misadventure', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4' },
-            { id: '6', title: 'Superbad', thumbnail: 'https://picsum.photos/200/300?random=6', description: 'Teen comedy', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4' },
-            { id: '7', title: 'The Shawshank Redemption', thumbnail: 'https://picsum.photos/200/300?random=7', description: 'Inspirational drama', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4' },
-            { id: '8', title: 'Forrest Gump', thumbnail: 'https://picsum.photos/200/300?random=8', description: 'Emotional journey', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4' },
-            { id: '9', title: 'Dune', thumbnail: 'https://picsum.photos/200/300?random=9', description: 'Epic sci-fi saga', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4' },
-            { id: '10', title: 'Interstellar', thumbnail: 'https://picsum.photos/200/300?random=10', description: 'Space exploration', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4' },
-            { id: '11', title: 'The Woman in the Yard', thumbnail: 'https://picsum.photos/200/300?random=11', description: 'Terrifying tale', videoUrl: 'https://assets.mixkit.co/videos/download/mixkit-sea-waves-on-the-shore-1170.mp4' },
-            { id: '12', title: 'A Knight\'s War', thumbnail: 'https://picsum.photos/200/300?random=12', description: 'Dark horror', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WhatCarCanYouGetForAGrand.mp4' },
-          ];
-          setMovies(mockedMovies);
+          setError(true);
+          setMovies([]);
+          setFilteredMovies([]);
         } else {
           setMovies(popularMovies);
+          setFilteredMovies(popularMovies);
         }
       } catch (error) {
-        console.error('Error fetching popular movies:', error);
-        const mockedMovies = [
-          { id: '1', title: 'Captain America: Brave New World', thumbnail: 'https://picsum.photos/200/300?random=1', description: 'Superhero action', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4' },
-          { id: '2', title: 'Sonic the Hedgehog 3', thumbnail: 'https://picsum.photos/200/300?random=2', description: 'Animated adventure', videoUrl: 'https://assets.mixkit.co/videos/download/mixkit-countryside-meadow-4075.mp4' },
-          { id: '3', title: 'Mad Max: Fury Road', thumbnail: 'https://picsum.photos/200/300?random=3', description: 'Post-apocalyptic action', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4' },
-          { id: '4', title: 'John Wick 4', thumbnail: 'https://picsum.photos/200/300?random=4', description: 'Action thriller', videoUrl: 'https://assets.mixkit.co/videos/download/mixkit-waves-in-the-ocean-1164.mp4' },
-          { id: '5', title: 'The Hangover', thumbnail: 'https://picsum.photos/200/300?random=5', description: 'Hilarious misadventure', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4' },
-          { id: '6', title: 'Superbad', thumbnail: 'https://picsum.photos/200/300?random=6', description: 'Teen comedy', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4' },
-          { id: '7', title: 'The Shawshank Redemption', thumbnail: 'https://picsum.photos/200/300?random=7', description: 'Inspirational drama', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4' },
-          { id: '8', title: 'Forrest Gump', thumbnail: 'https://picsum.photos/200/300?random=8', description: 'Emotional journey', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4' },
-          { id: '9', title: 'Dune', thumbnail: 'https://picsum.photos/200/300?random=9', description: 'Epic sci-fi saga', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4' },
-          { id: '10', title: 'Interstellar', thumbnail: 'https://picsum.photos/200/300?random=10', description: 'Space exploration', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4' },
-          { id: '11', title: 'The Woman in the Yard', thumbnail: 'https://picsum.photos/200/300?random=11', description: 'Terrifying tale', videoUrl: 'https://assets.mixkit.co/videos/download/mixkit-sea-waves-on-the-shore-1170.mp4' },
-          { id: '12', title: 'A Knight\'s War', thumbnail: 'https://picsum.photos/200/300?random=12', description: 'Dark horror', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WhatCarCanYouGetForAGrand.mp4' },
-        ];
-        setMovies(mockedMovies);
+        console.error("Error fetching popular movies:", error);
+        setError(true);
+        setMovies([]);
+        setFilteredMovies([]);
       } finally {
         setLoading(false);
       }
     };
     fetchMovies();
   }, []);
+
+  useEffect(() => {
+    const filtered = movies.filter((movie) =>
+      movie.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setFilteredMovies(filtered);
+  }, [searchQuery, movies]);
 
   if (loading) {
     return (
@@ -84,17 +113,43 @@ const ExploreScreen = () => {
     );
   }
 
+  if (error) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>
+          Failed to load movies. Please try again later.
+        </Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.sectionTitle}>Browse Popular Movies</Text>
+      <View style={styles.searchContainer}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search movies..."
+          placeholderTextColor="#aaa"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          autoCapitalize="none"
+          autoCorrect={false}
+        />
+      </View>
       <FlatList
-        data={movies}
+        data={filteredMovies}
         renderItem={({ item }) => <MovieItem item={item} />}
         keyExtractor={(item) => item.id}
         numColumns={2}
         columnWrapperStyle={styles.columnWrapper}
         contentContainerStyle={styles.browseList}
         showsVerticalScrollIndicator={true}
+        ListEmptyComponent={
+          searchQuery.length > 0 ? (
+            <Text style={styles.noResultsText}>No movies found.</Text>
+          ) : null
+        }
       />
     </View>
   );
@@ -103,13 +158,13 @@ const ExploreScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#141414',
+    backgroundColor: "#141414",
     padding: 10,
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#fff',
+    fontWeight: "bold",
+    color: "#fff",
     paddingVertical: 10,
     paddingHorizontal: 5,
   },
@@ -117,47 +172,76 @@ const styles = StyleSheet.create({
     paddingHorizontal: 5,
   },
   columnWrapper: {
-    justifyContent: 'space-between',
+    justifyContent: "space-between",
   },
   movieItem: {
     marginBottom: 10,
     width: width * 0.45,
-    alignItems: 'center',
+    alignItems: "center",
   },
   movieThumbnail: {
-    width: '100%',
+    width: "100%",
     height: width * 0.6,
     borderRadius: 10,
-    resizeMode: 'cover',
+    resizeMode: "cover",
   },
   movieTitle: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
     marginTop: 5,
-    textAlign: 'center',
-    width: '100%',
+    textAlign: "center",
+    width: "100%",
   },
   playButton: {
-    backgroundColor: '#E50914',
+    backgroundColor: "#E50914",
     paddingVertical: 5,
     paddingHorizontal: 10,
     borderRadius: 5,
     marginTop: 5,
   },
   playButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 14,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#141414',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#141414",
   },
   loadingText: {
-    color: '#fff',
+    color: "#fff",
     marginTop: 10,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#141414",
+  },
+  errorText: {
+    color: "#fff",
+    fontSize: 18,
+    textAlign: "center",
+  },
+  searchContainer: {
+    marginBottom: 15,
+  },
+  searchInput: {
+    backgroundColor: "#222",
+    color: "#fff",
+    padding: 10,
+    borderRadius: 5,
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: "#333",
+  },
+  noResultsText: {
+    color: "#fff",
+    fontSize: 16,
+    textAlign: "center",
+    marginTop: 20,
   },
 });
 

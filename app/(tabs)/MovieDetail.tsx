@@ -1,118 +1,214 @@
-import React, { useState, useRef } from 'react';
-import { View, Text, Image, StyleSheet, Dimensions, TouchableOpacity, ScrollView } from 'react-native';
-import { RouteProp, useRoute } from '@react-navigation/native';
-import { StackParamList } from './BrowseStack';
-import { Video, AVPlaybackStatus, ResizeMode } from 'expo-av';
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  Image,
+  ScrollView,
+  TouchableOpacity,
+  StyleSheet,
+  Dimensions,
+  StatusBar,
+  ActivityIndicator,
+} from "react-native";
+import { RouteProp, useNavigation } from "@react-navigation/native";
+import { StackParamList } from "./HomeStack";
+import { WebView } from "react-native-webview";
+import { LinearGradient } from "expo-linear-gradient";
+import { Ionicons } from "@expo/vector-icons";
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get("window");
 
-type MovieDetailRouteProp = RouteProp<StackParamList, 'MovieDetail'>;
+type MovieDetailRouteProp = RouteProp<StackParamList, "MovieDetail">;
 
-const MovieDetail = () => {
-  const route = useRoute<MovieDetailRouteProp>();
-  const { movie } = route.params as {
-    movie: {
-      id: string;
-      title: string;
-      thumbnail: string;
-      description: string;
-      videoUrl: string;
-    };
-  };
+type Props = {
+  route: MovieDetailRouteProp;
+};
 
+const MovieDetail = ({ route }: Props) => {
+  const { movie } = route.params;
   const [isPlaying, setIsPlaying] = useState(false);
-  const videoRef = useRef<Video>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handlePlay = async () => {
+  const handlePlayPress = () => {
     setIsPlaying(true);
-    if (videoRef.current) {
-      await videoRef.current.playAsync();
-    }
+    setIsLoading(true);
   };
 
-  const onPlaybackStatusUpdate = (status: AVPlaybackStatus) => {
-    if (status.isLoaded && status.didJustFinish) {
-      setIsPlaying(false);
-      videoRef.current?.unloadAsync();
-    }
+  // Convert YouTube watch URL to embed URL
+  const getEmbedUrl = (url: string | null) => {
+    if (!url) return null;
+    const videoId = url.split("v=")[1]?.split("&")[0];
+    if (!videoId) return url;
+    return `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=1&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3`;
   };
+
+  const embedUrl = getEmbedUrl(movie.videoUrl);
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.contentContainer}
-      showsVerticalScrollIndicator={true}
-    >
-      <Image source={{ uri: movie.thumbnail }} style={styles.thumbnail} />
-      <View style={styles.content}>
-        <Text style={styles.title}>{movie.title}</Text>
-        <Text style={styles.description}>{movie.description}</Text>
-        {!isPlaying ? (
-          <TouchableOpacity style={styles.playButton} onPress={handlePlay}>
-            <Text style={styles.playButtonText}>Play</Text>
-          </TouchableOpacity>
-        ) : (
-          <Video
-            ref={videoRef}
-            source={{ uri: movie.videoUrl || 'https://www.w3schools.com/html/mov_bbb.mp4' }}
-            style={styles.video}
-            useNativeControls
-            shouldPlay
-            resizeMode={ResizeMode.CONTAIN}
-            onPlaybackStatusUpdate={onPlaybackStatusUpdate}
-            onError={(e: any) => console.log('Video error:', e)}
-            isLooping
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#000" />
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        {/* Thumbnail with Gradient Overlay */}
+        <View style={styles.thumbnailContainer}>
+          <Image source={{ uri: movie.thumbnail }} style={styles.thumbnail} />
+          <LinearGradient
+            colors={["transparent", "#141414"]}
+            style={styles.gradientOverlay}
           />
-        )}
-      </View>
-    </ScrollView>
+        </View>
+
+        {/* Title and Metadata */}
+        <View style={styles.content}>
+          <Text style={styles.title}>{movie.title}</Text>
+          <View style={styles.metadata}>
+            <Text style={styles.metadataText}>
+              1h 32m • R • Action, Thriller
+            </Text>
+          </View>
+
+          {/* Description */}
+          <Text style={styles.description}>{movie.description}</Text>
+
+          {/* Play Trailer Section */}
+          {movie.videoUrl ? (
+            isPlaying ? (
+              <View style={styles.videoContainer}>
+                {isLoading && (
+                  <View style={styles.loadingOverlay}>
+                    <ActivityIndicator size="large" color="#E50914" />
+                  </View>
+                )}
+                <WebView
+                  style={styles.video}
+                  source={{ uri: embedUrl || "" }}
+                  allowsFullscreenVideo
+                  javaScriptEnabled
+                  domStorageEnabled
+                  allowsInlineMediaPlayback
+                  mediaPlaybackRequiresUserAction={false}
+                  onLoad={() => setIsLoading(false)} // Hide loading when video loads
+                  onError={(error) => {
+                    console.error("WebView error:", error);
+                    setIsLoading(false);
+                  }}
+                />
+              </View>
+            ) : (
+              <TouchableOpacity
+                style={styles.playButton}
+                onPress={handlePlayPress}
+              >
+                <Ionicons
+                  name="play"
+                  size={20}
+                  color="#000"
+                  style={styles.playIcon}
+                />
+                <Text style={styles.playButtonText}>Play Trailer</Text>
+              </TouchableOpacity>
+            )
+          ) : (
+            <Text style={styles.noTrailerText}>
+              No trailer available for this movie.
+            </Text>
+          )}
+        </View>
+      </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#141414',
+    backgroundColor: "#141414",
   },
-  contentContainer: {
-    paddingBottom: 40,
+  scrollContent: {
+    paddingTop: 0,
+  },
+  thumbnailContainer: {
+    position: "relative",
+    width: "100%",
+    height: height * 0.4,
   },
   thumbnail: {
-    width: width,
-    height: width * 1.5,
-    resizeMode: 'cover',
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover",
+  },
+  gradientOverlay: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: "50%",
   },
   content: {
-    padding: 20,
+    paddingHorizontal: 15,
+    paddingBottom: 20,
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 10,
+    fontSize: 28,
+    fontWeight: "bold",
+    color: "#fff",
+    marginBottom: 8,
+  },
+  metadata: {
+    flexDirection: "row",
+    marginBottom: 12,
+  },
+  metadataText: {
+    fontSize: 14,
+    color: "#ccc",
   },
   description: {
     fontSize: 16,
-    color: '#ccc',
+    color: "#ccc",
+    lineHeight: 24,
     marginBottom: 20,
   },
   playButton: {
-    backgroundColor: '#E50914',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
-    alignItems: 'center',
+    alignSelf: "flex-start",
+  },
+  playIcon: {
+    marginRight: 8,
   },
   playButtonText: {
-    color: '#fff',
+    color: "#000",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
+  },
+  videoContainer: {
+    width: "100%",
+    height: (width * 9) / 16, // 16:9 aspect ratio
+    marginBottom: 20,
+    borderRadius: 8,
+    overflow: "hidden",
+    backgroundColor: "#000", // Match dark theme to avoid white flash
   },
   video: {
-    width: width - 40,
-    height: (width - 40) * (9 / 16),
-    backgroundColor: '#000',
-    marginTop: 20,
+    width: "100%",
+    height: "100%",
+    backgroundColor: "#000", // Ensure WebView background is dark
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.8)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1,
+  },
+  noTrailerText: {
+    color: "#ccc",
+    fontSize: 16,
+    textAlign: "center",
+    marginVertical: 20,
   },
 });
 

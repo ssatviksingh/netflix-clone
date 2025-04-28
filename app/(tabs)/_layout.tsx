@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { SafeAreaView, StyleSheet, Platform, Animated } from 'react-native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Ionicons } from '@expo/vector-icons';
-import { RouteProp } from '@react-navigation/native'; // Corrected import
-import { BottomTabNavigationOptions } from '@react-navigation/bottom-tabs';
-import HomeStack from './HomeStack';
-import BrowseStack from './BrowseStack';
-import ProfileScreen from './Profile';
-import SplashScreen from './_splash';
+import React, { useState, useEffect } from "react";
+import { SafeAreaView, StyleSheet, Platform, Animated } from "react-native";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { Ionicons } from "@expo/vector-icons";
+import { RouteProp } from "@react-navigation/native";
+import { BottomTabNavigationOptions } from "@react-navigation/bottom-tabs";
+import HomeStack from "./HomeStack";
+import BrowseStack from "./BrowseStack";
+import ProfileScreen from "./Profile";
+import SplashScreen from "./_splash";
 
 // Define the param list for the tab navigator
 type TabParamList = {
@@ -27,24 +27,39 @@ const Layout = () => {
   }, []);
 
   if (isSplashVisible) {
-    return <SplashScreen navigation={{ replace: (route: string) => setIsSplashVisible(false) }} />;
+    return (
+      <SplashScreen
+        navigation={{ replace: (route: string) => setIsSplashVisible(false) }}
+      />
+    );
   }
 
-  const screenOptions = ({ route }: { route: RouteProp<TabParamList, keyof TabParamList> }): BottomTabNavigationOptions => {
-    const iconMap: Record<keyof TabParamList, keyof typeof Ionicons.glyphMap> = {
-      Home: 'home',
-      Browse: 'search',
-      Profile: 'person',
-    };
+  const screenOptions = ({
+    route,
+  }: {
+    route: RouteProp<TabParamList, keyof TabParamList>;
+  }): BottomTabNavigationOptions => {
+    const iconMap: Record<keyof TabParamList, keyof typeof Ionicons.glyphMap> =
+      {
+        Home: "home",
+        Browse: "search",
+        Profile: "person",
+      };
 
     return {
-      tabBarIcon: ({ color, size }) => <Ionicons name={iconMap[route.name as keyof TabParamList]} size={size} color={color} />,
-      tabBarActiveTintColor: '#E50914',
-      tabBarInactiveTintColor: 'gray',
-      tabBarStyle: { backgroundColor: '#141414' },
+      tabBarIcon: ({ color, size }) => (
+        <Ionicons
+          name={iconMap[route.name as keyof TabParamList]}
+          size={size}
+          color={color}
+        />
+      ),
+      tabBarActiveTintColor: "#E50914",
+      tabBarInactiveTintColor: "gray",
+      tabBarStyle: { backgroundColor: "#141414" },
       headerShown: false,
       transitionSpec: {
-        animation: 'timing',
+        animation: "timing",
         config: {
           duration: 300,
         },
@@ -66,8 +81,8 @@ const Layout = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#141414',
-    paddingTop: Platform.OS === 'android' ? 25 : 0,
+    backgroundColor: "#141414",
+    paddingTop: Platform.OS === "android" ? 25 : 0,
   },
 });
 

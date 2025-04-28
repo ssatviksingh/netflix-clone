@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -8,26 +8,23 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
-} from 'react-native';
-import { useNavigation, NavigationProp } from '@react-navigation/native';
-import { getPopularMovies } from '../../api/movieService'; 
-import { StackParamList } from './HomeStack'; 
+  SafeAreaView,
+} from "react-native";
+import { useNavigation, NavigationProp } from "@react-navigation/native";
+import { fetchMovieSections } from "../../api/movieService";
+import { StackParamList } from "./HomeStack";
 
-// ✅ Define types here so no external imports break
-type TMDBMovie = {
+type Movie = {
   id: string;
   title: string;
   thumbnail: string;
   description: string;
-};
-
-type Movie = TMDBMovie & {
-  videoUrl: string;
+  videoUrl: string | null;
 };
 
 type SectionData = {
   title: string;
-  data: Movie[];
+  movies: Movie[];
   isFeatured?: boolean;
 };
 
@@ -36,126 +33,40 @@ const HomeScreen = () => {
   const [sections, setSections] = useState<SectionData[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchMovies = async () => {
-      setLoading(true);
-      try {
-        const popularMovies = await getPopularMovies();
-
-        if (popularMovies && popularMovies.length > 0) {
-          const mappedMovies: Movie[] = popularMovies.map(
-            (movie: TMDBMovie, index: number) => ({
-              id: movie.id || index.toString(),
-              title: movie.title,
-              thumbnail: movie.thumbnail,
-              description: movie.description,
-              videoUrl:
-                'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-            })
-          );
-
-          const uniqueMovies = Array.from(
-            new Map(
-              mappedMovies.map((movie) => [movie.title + movie.id, movie])
-            ).values()
-          );
-
-          const featuredMovies = uniqueMovies.slice(0, 8);
-          const genreMovies = uniqueMovies.reduce(
-            (
-              acc: {
-                [key in 'Action' | 'Comedy' | 'Drama' | 'Sci-Fi' | 'Horror']: Movie[];
-              },
-              movie: Movie
-            ) => {
-              const genre = assignGenre(movie);
-              if (!acc[genre].some((m) => m.id === movie.id)) {
-                acc[genre].push(movie);
-              }
-              return acc;
-            },
-            { Action: [], Comedy: [], Drama: [], 'Sci-Fi': [], Horror: [] }
-          );
-
-          const sectionsData: SectionData[] = [
-            { title: 'Featured Movies', data: featuredMovies, isFeatured: true },
-            { title: 'Action', data: genreMovies.Action },
-            { title: 'Comedy', data: genreMovies.Comedy },
-            { title: 'Drama', data: genreMovies.Drama },
-            { title: 'Sci-Fi', data: genreMovies['Sci-Fi'] },
-            { title: 'Horror', data: genreMovies.Horror },
-          ].filter((section) => section.data.length > 0);
-
-          setSections(sectionsData);
-        }
-      } catch (error) {
-        console.error('Error fetching movies:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchMovies();
+  const loadSections = useCallback(async () => {
+    setLoading(true);
+    try {
+      const sectionsData = await fetchMovieSections();
+      const parsed = sectionsData.map((section: any) => ({
+        title: section.title,
+        movies: section.movies,
+        isFeatured: section.title === "Trending Now",
+      }));
+      setSections(parsed);
+    } catch (error) {
+      console.error("Failed to fetch movies:", error);
+      setSections([]);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  const assignGenre = (
-    movie: Movie
-  ): 'Action' | 'Comedy' | 'Drama' | 'Sci-Fi' | 'Horror' => {
-    const title = movie.title.toLowerCase();
-    if (
-      title.includes('action') ||
-      title.includes('captain') ||
-      title.includes('lost') ||
-      title.includes('g20') ||
-      title.includes('gunslingers') ||
-      title.includes('knight') ||
-      title.includes('cleaner')
-    )
-      return 'Action';
-    if (
-      title.includes('comedy') ||
-      title.includes('minecraft') ||
-      title.includes('laila') ||
-      title.includes('mickey')
-    )
-      return 'Comedy';
-    if (
-      title.includes('drama') ||
-      title.includes('passion') ||
-      title.includes('sinners') ||
-      title.includes('codes') ||
-      title.includes('mufasa')
-    )
-      return 'Drama';
-    if (
-      title.includes('sci-fi') ||
-      title.includes('moana') ||
-      title.includes('sonic') ||
-      title.includes('carjackers')
-    )
-      return 'Sci-Fi';
-    if (
-      title.includes('horror') ||
-      title.includes('yard') ||
-      title.includes('rebirth') ||
-      title.includes('novocaine')
-    )
-      return 'Horror';
+  useEffect(() => {
+    loadSections();
+  }, [loadSections]);
 
-    const randomGenre = ['Action', 'Comedy', 'Drama', 'Sci-Fi', 'Horror'][
-      Math.floor(Math.random() * 5)
-    ] as 'Action' | 'Comedy' | 'Drama' | 'Sci-Fi' | 'Horror';
-    return randomGenre;
+  const handlePressMovie = (movie: Movie) => {
+    navigation.navigate("MovieDetail", { movie });
   };
 
   const renderMovie = ({ item }: { item: Movie }) => (
     <TouchableOpacity
       style={styles.movieItem}
-      onPress={() => navigation.navigate('MovieDetail', { movie: item })}
+      onPress={() => handlePressMovie(item)}
     >
       <Image
         source={{
-          uri: item.thumbnail || 'https://via.placeholder.com/200x300',
+          uri: item.thumbnail || "https://via.placeholder.com/140x200",
         }}
         style={styles.movieImage}
       />
@@ -167,35 +78,50 @@ const HomeScreen = () => {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
+      <SafeAreaView style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#E50914" />
-        <Text style={styles.loadingText}>Loading...</Text>
-      </View>
+        <Text style={styles.loadingText}>Loading Movies...</Text>
+      </SafeAreaView>
+    );
+  }
+
+  if (!sections.length) {
+    return (
+      <SafeAreaView style={styles.errorContainer}>
+        <Text style={styles.errorText}>
+          Oops! Couldn't load movies. Please try again.
+        </Text>
+      </SafeAreaView>
     );
   }
 
   return (
-    <ScrollView style={styles.container}>
-      {sections.map((section, idx) => (
-        <View key={idx} style={styles.sectionContainer}>
-          <Text
-            style={[
-              styles.sectionTitle,
-              section.isFeatured ? { color: '#E50914' } : {},
-            ]}
-          >
-            {section.title}
-          </Text>
-          <FlatList
-            horizontal
-            data={section.data}
-            renderItem={renderMovie}
-            keyExtractor={(item, index) => `${item.id}-${index}`}
-            showsHorizontalScrollIndicator={false}
-          />
-        </View>
-      ))}
-    </ScrollView>
+    <SafeAreaView style={styles.container}>
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 30, backgroundColor: "#000" }}
+      >
+        {sections.map((section) => (
+          <View key={section.title} style={styles.sectionContainer}>
+            <Text
+              style={[
+                styles.sectionTitle,
+                section.isFeatured && { color: "#E50914" },
+              ]}
+            >
+              {section.title}
+            </Text>
+            <FlatList
+              data={section.movies}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={renderMovie}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.movieList}
+            />
+          </View>
+        ))}
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
@@ -204,40 +130,59 @@ export default HomeScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: "#000",
   },
   sectionContainer: {
-    marginVertical: 16,
-    paddingLeft: 10,
+    marginVertical: 20,
+    paddingLeft: 15,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    color: '#fff',
+    fontSize: 24,
+    fontWeight: "700",
+    marginBottom: 15,
+    color: "#fff",
+    paddingLeft: 5,
+  },
+  movieList: {
+    paddingRight: 15,
   },
   movieItem: {
-    width: 120,
+    width: 140,
     marginRight: 10,
   },
   movieImage: {
-    width: '100%',
-    height: 180,
+    width: "100%",
+    height: 200,
     borderRadius: 8,
+    backgroundColor: "#222",
   },
   movieTitle: {
-    color: '#fff',
+    color: "#fff",
     marginTop: 5,
-    fontSize: 12,
+    fontSize: 14,
+    textAlign: "center",
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#000',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#000",
   },
   loadingText: {
-    color: '#fff',
+    color: "#fff",
     marginTop: 10,
+    fontSize: 16,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#000",
+    padding: 20,
+  },
+  errorText: {
+    color: "#fff",
+    fontSize: 18,
+    textAlign: "center",
   },
 });
