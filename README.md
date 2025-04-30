@@ -29,7 +29,7 @@ Navigation: React Navigation
 📦Installation
 
 bash-
-git clone https://github.com/your-username/netflix-clone.git
+git clone https://github.com/ssatviksingh/netflix-clone.git
 cd netflix-clone
 npm install
 
