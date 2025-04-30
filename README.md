@@ -31,7 +31,9 @@ Navigation: React Navigation
 
 bash-
 git clone https://github.com/ssatviksingh/netflix-clone.git
+
 cd netflix-clone
+
 npm install
 
 npx expo start
