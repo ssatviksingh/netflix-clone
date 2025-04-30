@@ -9,23 +9,27 @@ import BrowseStack from "./BrowseStack";
 import ProfileScreen from "./Profile";
 import SplashScreen from "./_splash";
 
-// Define the param list for the tab navigator
+// Define the parameter list for the Tab Navigator
 type TabParamList = {
   Home: undefined;
   Browse: undefined;
   Profile: undefined;
 };
 
+// Create the Bottom Tab Navigator instance
 const Tab = createBottomTabNavigator<TabParamList>();
 
 const Layout = () => {
+  // State to control whether the splash screen is visible
   const [isSplashVisible, setIsSplashVisible] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsSplashVisible(false), 2000); // 2 seconds total
-    return () => clearTimeout(timer);
+    // Automatically hide the splash screen after 2 seconds
+    const timer = setTimeout(() => setIsSplashVisible(false), 2000);
+    return () => clearTimeout(timer); // Clean up the timer on unmount
   }, []);
 
+  // If the splash screen is still visible, render it
   if (isSplashVisible) {
     return (
       <SplashScreen
@@ -34,11 +38,13 @@ const Layout = () => {
     );
   }
 
+  // Define screen options for each tab (icon, colors, style)
   const screenOptions = ({
     route,
   }: {
     route: RouteProp<TabParamList, keyof TabParamList>;
   }): BottomTabNavigationOptions => {
+    // Map tab names to Ionicons icon names
     const iconMap: Record<keyof TabParamList, keyof typeof Ionicons.glyphMap> =
       {
         Home: "home",
@@ -47,6 +53,7 @@ const Layout = () => {
       };
 
     return {
+      // Set the tab bar icon for each screen
       tabBarIcon: ({ color, size }) => (
         <Ionicons
           name={iconMap[route.name as keyof TabParamList]}
@@ -54,14 +61,14 @@ const Layout = () => {
           color={color}
         />
       ),
-      tabBarActiveTintColor: "#E50914",
-      tabBarInactiveTintColor: "gray",
-      tabBarStyle: { backgroundColor: "#141414" },
-      headerShown: false,
+      tabBarActiveTintColor: "#E50914", // Active tab color
+      tabBarInactiveTintColor: "gray", // Inactive tab color
+      tabBarStyle: { backgroundColor: "#141414" }, // Tab bar background color
+      headerShown: false, // Hide the default header
       transitionSpec: {
-        animation: "timing",
+        animation: "timing", // Timing animation for screen transitions
         config: {
-          duration: 300,
+          duration: 300, // Animation duration (in milliseconds)
         },
       },
     };
@@ -69,6 +76,7 @@ const Layout = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Set up the Bottom Tab Navigator */}
       <Tab.Navigator screenOptions={screenOptions}>
         <Tab.Screen name="Home" component={HomeStack} />
         <Tab.Screen name="Browse" component={BrowseStack} />
@@ -78,11 +86,12 @@ const Layout = () => {
   );
 };
 
+// Define the global styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#141414",
-    paddingTop: Platform.OS === "android" ? 25 : 0,
+    backgroundColor: "#141414", // Match the dark theme
+    paddingTop: Platform.OS === "android" ? 25 : 0, // Add padding for Android status bar
   },
 });
 

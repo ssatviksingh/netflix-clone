@@ -1,42 +1,49 @@
 import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createDrawerNavigator } from "@react-navigation/drawer";
-import { DrawerActions } from "@react-navigation/native"; // Changed import source
-import { Ionicons } from "@expo/vector-icons";
+import { DrawerActions } from "@react-navigation/native"; // For manually controlling the drawer
+import { Ionicons } from "@expo/vector-icons"; // (Not used here but imported for future icons)
 import { TouchableOpacity, View, Text, StyleSheet } from "react-native";
 import HomeStack from "./HomeStack";
 import BrowseStack from "./BrowseStack";
 import ProfileScreen from "./Profile";
 
+// Create Drawer Navigator instance
 const Drawer = createDrawerNavigator();
 
 const App = () => {
   return (
     <NavigationContainer>
+      {" "}
+      {/* Main container for navigation */}
       <Drawer.Navigator
         screenOptions={{
           drawerStyle: {
             backgroundColor: "#1f1f1f",
             width: 240,
           },
-          drawerActiveTintColor: "#E50914",
-          drawerInactiveTintColor: "#fff",
-          headerShown: false,
+          drawerActiveTintColor: "#E50914", // Color when item is active
+          drawerInactiveTintColor: "#fff", // Color when item is inactive
+          headerShown: false, // Hide default header
         }}
         drawerContent={(props) => {
+          // Custom Drawer Content
           const navigateToSection = (screen: string) => {
-            props.navigation.navigate(screen);
+            props.navigation.navigate(screen); // Navigate to a specific screen
           };
+
           const scrollToGenre = (genre: string) => {
+            // Navigate and scroll inside HomeFeed screen to a genre
             props.navigation.navigate("HomeStack", {
               screen: "HomeFeed",
               params: { scrollTo: genre },
             });
-            props.navigation.dispatch(DrawerActions.closeDrawer());
+            props.navigation.dispatch(DrawerActions.closeDrawer()); // Close drawer after selecting
           };
 
           return (
             <View style={styles.drawerContainer}>
+              {/* Custom drawer items */}
               <TouchableOpacity
                 style={styles.drawerItem}
                 onPress={() => navigateToSection("HomeStack")}
@@ -50,6 +57,7 @@ const App = () => {
                   Home
                 </Text>
               </TouchableOpacity>
+
               <TouchableOpacity
                 style={styles.drawerItem}
                 onPress={() => navigateToSection("BrowseStack")}
@@ -63,6 +71,7 @@ const App = () => {
                   Browse
                 </Text>
               </TouchableOpacity>
+
               <TouchableOpacity
                 style={styles.drawerItem}
                 onPress={() => navigateToSection("Profile")}
@@ -76,6 +85,8 @@ const App = () => {
                   Profile
                 </Text>
               </TouchableOpacity>
+
+              {/* Genre shortcuts */}
               <TouchableOpacity
                 style={styles.drawerItem}
                 onPress={() => scrollToGenre("Trending Now")}
@@ -89,6 +100,7 @@ const App = () => {
                   Trending
                 </Text>
               </TouchableOpacity>
+
               <TouchableOpacity
                 style={styles.drawerItem}
                 onPress={() => scrollToGenre("Action")}
@@ -102,6 +114,7 @@ const App = () => {
                   Action
                 </Text>
               </TouchableOpacity>
+
               <TouchableOpacity
                 style={styles.drawerItem}
                 onPress={() => scrollToGenre("Comedy")}
@@ -115,6 +128,7 @@ const App = () => {
                   Comedy
                 </Text>
               </TouchableOpacity>
+
               <TouchableOpacity
                 style={styles.drawerItem}
                 onPress={() => scrollToGenre("Drama")}
@@ -128,6 +142,7 @@ const App = () => {
                   Drama
                 </Text>
               </TouchableOpacity>
+
               <TouchableOpacity
                 style={styles.drawerItem}
                 onPress={() => scrollToGenre("Sci-Fi")}
@@ -141,6 +156,7 @@ const App = () => {
                   Sci-Fi
                 </Text>
               </TouchableOpacity>
+
               <TouchableOpacity
                 style={styles.drawerItem}
                 onPress={() => scrollToGenre("Horror")}
@@ -158,6 +174,7 @@ const App = () => {
           );
         }}
       >
+        {/* Define screens for the Drawer */}
         <Drawer.Screen name="HomeStack" component={HomeStack} />
         <Drawer.Screen name="BrowseStack" component={BrowseStack} />
         <Drawer.Screen name="Profile" component={ProfileScreen} />
@@ -166,6 +183,7 @@ const App = () => {
   );
 };
 
+// Styles for the drawer items and container
 const styles = StyleSheet.create({
   drawerContainer: {
     flex: 1,

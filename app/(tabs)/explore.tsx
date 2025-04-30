@@ -14,8 +14,10 @@ import { useNavigation, NavigationProp } from "@react-navigation/native";
 import { StackParamList } from "./BrowseStack";
 import { getPopularMovies } from "../../api/movieService";
 
+// Get device screen width for dynamic sizing
 const { width } = Dimensions.get("window");
 
+// Movie item component
 const MovieItem = ({
   item,
 }: {
@@ -25,18 +27,25 @@ const MovieItem = ({
     thumbnail: string;
     description: string;
     videoUrl: string | null;
+    fullMovieUrl: string | null;
   };
 }) => {
   const navigation = useNavigation<NavigationProp<StackParamList>>();
+
   return (
     <TouchableOpacity
       style={styles.movieItem}
       onPress={() => navigation.navigate("MovieDetail", { movie: item })}
     >
+      {/* Movie thumbnail image */}
       <Image source={{ uri: item.thumbnail }} style={styles.movieThumbnail} />
+
+      {/* Movie title */}
       <Text style={styles.movieTitle} numberOfLines={1}>
         {item.title}
       </Text>
+
+      {/* Play button */}
       <TouchableOpacity
         style={styles.playButton}
         onPress={() => navigation.navigate("MovieDetail", { movie: item })}
@@ -47,8 +56,11 @@ const MovieItem = ({
   );
 };
 
+// ExploreScreen: Displays list of movies and search functionality
 const ExploreScreen = () => {
   const navigation = useNavigation<NavigationProp<StackParamList>>();
+
+  // State for movie data, filtered data, loading and error handling
   const [movies, setMovies] = useState<
     {
       id: string;
@@ -56,27 +68,24 @@ const ExploreScreen = () => {
       thumbnail: string;
       description: string;
       videoUrl: string | null;
+      fullMovieUrl: string | null;
     }[]
   >([]);
-  const [filteredMovies, setFilteredMovies] = useState<
-    {
-      id: string;
-      title: string;
-      thumbnail: string;
-      description: string;
-      videoUrl: string | null;
-    }[]
-  >([]);
+  const [filteredMovies, setFilteredMovies] = useState<typeof movies>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Fetch popular movies on component mount
   useEffect(() => {
     const fetchMovies = async () => {
       setLoading(true);
       setError(false);
+
       try {
         const popularMovies = await getPopularMovies();
+
+        // Handle empty results
         if (!popularMovies || popularMovies.length === 0) {
           setError(true);
           setMovies([]);
@@ -94,9 +103,11 @@ const ExploreScreen = () => {
         setLoading(false);
       }
     };
+
     fetchMovies();
   }, []);
 
+  // Update filtered movies when search query changes
   useEffect(() => {
     const filtered = movies.filter((movie) =>
       movie.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -104,6 +115,7 @@ const ExploreScreen = () => {
     setFilteredMovies(filtered);
   }, [searchQuery, movies]);
 
+  // Show loading spinner while fetching data
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -113,6 +125,7 @@ const ExploreScreen = () => {
     );
   }
 
+  // Show error message if fetching fails
   if (error) {
     return (
       <View style={styles.errorContainer}>
@@ -123,9 +136,13 @@ const ExploreScreen = () => {
     );
   }
 
+  // Main screen UI
   return (
     <View style={styles.container}>
+      {/* Title */}
       <Text style={styles.sectionTitle}>Browse Popular Movies</Text>
+
+      {/* Search input */}
       <View style={styles.searchContainer}>
         <TextInput
           style={styles.searchInput}
@@ -137,6 +154,8 @@ const ExploreScreen = () => {
           autoCorrect={false}
         />
       </View>
+
+      {/* Movies list */}
       <FlatList
         data={filteredMovies}
         renderItem={({ item }) => <MovieItem item={item} />}
@@ -155,6 +174,7 @@ const ExploreScreen = () => {
   );
 };
 
+// Styles for the screen
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -213,35 +233,6 @@ const styles = StyleSheet.create({
   loadingText: {
     color: "#fff",
     marginTop: 10,
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#141414",
-  },
-  errorText: {
-    color: "#fff",
-    fontSize: 18,
-    textAlign: "center",
-  },
-  searchContainer: {
-    marginBottom: 15,
-  },
-  searchInput: {
-    backgroundColor: "#222",
-    color: "#fff",
-    padding: 10,
-    borderRadius: 5,
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: "#333",
-  },
-  noResultsText: {
-    color: "#fff",
-    fontSize: 16,
-    textAlign: "center",
-    marginTop: 20,
   },
 });
 

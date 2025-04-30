@@ -9,15 +9,18 @@ import {
   Dimensions,
   StatusBar,
   ActivityIndicator,
+  Alert,
 } from "react-native";
-import { RouteProp, useNavigation } from "@react-navigation/native";
+import { RouteProp } from "@react-navigation/native";
 import { StackParamList } from "./HomeStack";
 import { WebView } from "react-native-webview";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 
+// Get screen width and height
 const { width, height } = Dimensions.get("window");
 
+// Define type for route props
 type MovieDetailRouteProp = RouteProp<StackParamList, "MovieDetail">;
 
 type Props = {
@@ -26,15 +29,31 @@ type Props = {
 
 const MovieDetail = ({ route }: Props) => {
   const { movie } = route.params;
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
+  // Local state management
+  const [isPlaying, setIsPlaying] = useState(false); // For playing trailer
+  const [isMoviePlaying, setIsMoviePlaying] = useState(false); // For playing full movie
+  const [isLoading, setIsLoading] = useState(false); // For showing loading spinner
+
+  // Handle play trailer button
   const handlePlayPress = () => {
     setIsPlaying(true);
+    setIsMoviePlaying(false);
     setIsLoading(true);
   };
 
-  // Convert YouTube watch URL to embed URL
+  // Handle play full movie button
+  const handleMoviePlayPress = () => {
+    if (movie.fullMovieUrl) {
+      setIsPlaying(false);
+      setIsMoviePlaying(true);
+      setIsLoading(true);
+    } else {
+      Alert.alert("Full movie not available.");
+    }
+  };
+
+  // Convert a YouTube URL into an embeddable link
   const getEmbedUrl = (url: string | null) => {
     if (!url) return null;
     const videoId = url.split("v=")[1]?.split("&")[0];
@@ -46,9 +65,10 @@ const MovieDetail = ({ route }: Props) => {
 
   return (
     <View style={styles.container}>
+      {/* Set status bar style */}
       <StatusBar barStyle="light-content" backgroundColor="#000" />
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Thumbnail with Gradient Overlay */}
+        {/* Thumbnail Image with Gradient overlay */}
         <View style={styles.thumbnailContainer}>
           <Image source={{ uri: movie.thumbnail }} style={styles.thumbnail} />
           <LinearGradient
@@ -57,36 +77,45 @@ const MovieDetail = ({ route }: Props) => {
           />
         </View>
 
-        {/* Title and Metadata */}
+        {/* Movie content section */}
         <View style={styles.content}>
+          {/* Movie Title */}
           <Text style={styles.title}>{movie.title}</Text>
+
+          {/* Metadata */}
           <View style={styles.metadata}>
             <Text style={styles.metadataText}>
               1h 32m • R • Action, Thriller
             </Text>
           </View>
 
-          {/* Description */}
+          {/* Movie Description */}
           <Text style={styles.description}>{movie.description}</Text>
 
-          {/* Play Trailer Section */}
+          {/* Trailer or Movie Video */}
           {movie.videoUrl ? (
-            isPlaying ? (
+            isPlaying || isMoviePlaying ? (
               <View style={styles.videoContainer}>
+                {/* Show loading indicator while video loads */}
                 {isLoading && (
                   <View style={styles.loadingOverlay}>
                     <ActivityIndicator size="large" color="#E50914" />
                   </View>
                 )}
+                {/* Video Player */}
                 <WebView
                   style={styles.video}
-                  source={{ uri: embedUrl || "" }}
+                  source={{
+                    uri: isMoviePlaying
+                      ? movie.fullMovieUrl || ""
+                      : embedUrl || "",
+                  }}
                   allowsFullscreenVideo
                   javaScriptEnabled
                   domStorageEnabled
                   allowsInlineMediaPlayback
                   mediaPlaybackRequiresUserAction={false}
-                  onLoad={() => setIsLoading(false)} // Hide loading when video loads
+                  onLoad={() => setIsLoading(false)}
                   onError={(error) => {
                     console.error("WebView error:", error);
                     setIsLoading(false);
@@ -94,20 +123,43 @@ const MovieDetail = ({ route }: Props) => {
                 />
               </View>
             ) : (
-              <TouchableOpacity
-                style={styles.playButton}
-                onPress={handlePlayPress}
-              >
-                <Ionicons
-                  name="play"
-                  size={20}
-                  color="#000"
-                  style={styles.playIcon}
-                />
-                <Text style={styles.playButtonText}>Play Trailer</Text>
-              </TouchableOpacity>
+              <>
+                {/* Play Trailer Button */}
+                <TouchableOpacity
+                  style={styles.playButton}
+                  onPress={handlePlayPress}
+                >
+                  <Ionicons
+                    name="play"
+                    size={20}
+                    color="#000"
+                    style={styles.playIcon}
+                  />
+                  <Text style={styles.playButtonText}>Play Trailer</Text>
+                </TouchableOpacity>
+
+                {/* Play Full Movie Button */}
+                <TouchableOpacity
+                  style={[
+                    styles.playButton,
+                    { backgroundColor: "#E50914", marginTop: 10 },
+                  ]}
+                  onPress={handleMoviePlayPress}
+                >
+                  <Ionicons
+                    name="film"
+                    size={20}
+                    color="#fff"
+                    style={styles.playIcon}
+                  />
+                  <Text style={[styles.playButtonText, { color: "#fff" }]}>
+                    Play Movie
+                  </Text>
+                </TouchableOpacity>
+              </>
             )
           ) : (
+            // No trailer available message
             <Text style={styles.noTrailerText}>
               No trailer available for this movie.
             </Text>
@@ -118,6 +170,7 @@ const MovieDetail = ({ route }: Props) => {
   );
 };
 
+// Styles for the MovieDetail screen
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -190,12 +243,12 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     borderRadius: 8,
     overflow: "hidden",
-    backgroundColor: "#000", // Match dark theme to avoid white flash
+    backgroundColor: "#000",
   },
   video: {
     width: "100%",
     height: "100%",
-    backgroundColor: "#000", // Ensure WebView background is dark
+    backgroundColor: "#000",
   },
   loadingOverlay: {
     ...StyleSheet.absoluteFillObject,

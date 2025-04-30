@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { TMDB_BASE_URL, TMDB_API_KEY } from './config';
 
+// Create a reusable axios instance configured for TMDB API
 const api = axios.create({
   baseURL: TMDB_BASE_URL,
   params: {
@@ -9,17 +10,21 @@ const api = axios.create({
   },
 });
 
+// Fetch the best available video URL (Trailer > Teaser > any YouTube video) for a given movie
 const getVideoUrl = async (movieId: string) => {
   try {
     const response = await api.get(`/movie/${movieId}/videos`);
     const videos = response.data.results;
-    console.log(`Videos for movie ID ${movieId}:`, videos); // Debug log
+    console.log(`Videos for movie ID ${movieId}:`, videos);
+
     // Prioritize Trailer, then Teaser, then any YouTube video
     const trailer = videos.find((video: any) => video.type === 'Trailer' && video.site === 'YouTube') ??
-                   videos.find((video: any) => video.type === 'Teaser' && video.site === 'YouTube') ??
-                   videos.find((video: any) => video.site === 'YouTube');
+                    videos.find((video: any) => video.type === 'Teaser' && video.site === 'YouTube') ??
+                    videos.find((video: any) => video.site === 'YouTube');
+
     const videoUrl = trailer ? `https://www.youtube.com/watch?v=${trailer.key}` : null;
-    console.log(`Selected video URL for movie ID ${movieId}:`, videoUrl); // Debug log
+    console.log(`Selected video URL for movie ID ${movieId}:`, videoUrl);
+
     return videoUrl;
   } catch (error) {
     console.error(`Error fetching video for movie ID ${movieId}:`, error);
@@ -27,6 +32,7 @@ const getVideoUrl = async (movieId: string) => {
   }
 };
 
+// Fetch popular movies from TMDB, attach their video URLs
 export const getPopularMovies = async () => {
   try {
     const response = await api.get('/movie/popular');
@@ -38,7 +44,7 @@ export const getPopularMovies = async () => {
           title: movie.title,
           thumbnail: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
           description: movie.overview,
-          videoUrl: videoUrl, // No fallback, keep as null if not found
+          videoUrl: videoUrl, // Attach video URL or keep null
         };
       })
     );
@@ -49,6 +55,7 @@ export const getPopularMovies = async () => {
   }
 };
 
+// Fetch trending movies of the week from TMDB, attach their video URLs
 export const getTrendingMovies = async () => {
   try {
     const response = await api.get('/trending/movie/week');
@@ -60,7 +67,7 @@ export const getTrendingMovies = async () => {
           title: movie.title,
           thumbnail: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
           description: movie.overview,
-          videoUrl: videoUrl, // No fallback, keep as null if not found
+          videoUrl: videoUrl, // Attach video URL or keep null
         };
       })
     );
@@ -71,6 +78,7 @@ export const getTrendingMovies = async () => {
   }
 };
 
+// Fetch movies by genre, attach their video URLs, and limit to 10 movies
 export const getMoviesByGenre = async (genreId: number, genreName: string) => {
   try {
     const response = await api.get('/discover/movie', {
@@ -88,7 +96,7 @@ export const getMoviesByGenre = async (genreId: number, genreName: string) => {
           thumbnail: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
           description: movie.overview,
           genre: genreName,
-          videoUrl: videoUrl, // No fallback, keep as null if not found
+          videoUrl: videoUrl, // Attach video URL or keep null
         };
       })
     );
@@ -99,7 +107,9 @@ export const getMoviesByGenre = async (genreId: number, genreName: string) => {
   }
 };
 
+// Fetch all movie sections (Trending + several genres) with their movies
 export const fetchMovieSections = async () => {
+  // Define the sections and corresponding movie fetch operations
   const sectionPromises = [
     { title: 'Trending Now', movies: getTrendingMovies() },
     { title: 'Action', movies: getMoviesByGenre(28, 'Action') },
@@ -109,6 +119,7 @@ export const fetchMovieSections = async () => {
     { title: 'Horror', movies: getMoviesByGenre(27, 'Horror') },
   ];
 
+  // Resolve all section promises
   const resolvedSections = await Promise.all(
     sectionPromises.map(async (section) => ({
       title: section.title,
