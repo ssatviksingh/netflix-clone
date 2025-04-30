@@ -2,6 +2,7 @@
 A responsive and modern Netflix clone streaming app built with a user-friendly UI and seamless video experience.
 
 🚀 Features
+
 ✅ Browse trending movies and TV shows
 
 ✅ Search functionality
