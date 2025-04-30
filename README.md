@@ -1,54 +1,57 @@
-<<<<<<< HEAD
-# Welcome to your Expo app 👋
+🎬 Netflix Clone App
+A responsive and modern Netflix clone streaming app built with a user-friendly UI and seamless video experience.
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+🚀 Features
+✅ Browse trending movies and TV shows
 
-## Get started
+✅ Search functionality
 
-1. Install dependencies
+✅ Play video previews
 
-   ```bash
-   npm install
-   ```
+✅ Responsive layout (mobile + desktop)
 
-2. Start the app
+✅ Dark mode interface
 
-   ```bash
-    npx expo start
-   ```
+✅ Movie details page
 
-In the output, you'll find options to open the app in a
+🛠️ Tech Stack
+Frontend: React Native / Expo
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+API: TMDb API (The Movie Database)
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+Styling: Tailwind CSS (for web) or styled-components (for React Native)
 
-## Get a fresh project
+Video Player: Expo Video / React Native Video
 
-When you're ready, run:
+Navigation: React Navigation
 
-```bash
-npm run reset-project
-```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+📦Installation
 
-## Learn more
+bash-
+git clone https://github.com/your-username/netflix-clone.git
+cd netflix-clone
+npm install
 
-To learn more about developing your project with Expo, look at the following resources:
+npx expo start
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+🔑 API Key Setup
+1)Create a free account at TMDb.
 
-## Join the community
+2)Get your API key from the dashboard.
 
-Join our community of developers creating universal apps.
+3)Create a .env file in the root directory:
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
-=======
-# netflix-clone
->>>>>>> 07b3fe7805869c156184406232aa73edfb48259b
+-TMDB_API_KEY=your_tmdb_api_key_here
+
+🖼️ Screenshots
+![Screenshot_1746030552](https://github.com/user-attachments/assets/a7b43da6-d7b5-493b-ae4a-0d68afece543)
+![Screenshot_1746030540](https://github.com/user-attachments/assets/0867d527-a451-46dc-8442-dbdc267db013)
+![Screenshot_1746030532](https://github.com/user-attachments/assets/ca094caa-9b22-44b7-a049-6cc9f5f99eef)
+![Screenshot_1746030522](https://github.com/user-attachments/assets/37e7da1b-63d8-4ef5-a1ca-4104bfb42079)
+![Screenshot_1746030506](https://github.com/user-attachments/assets/569753eb-220e-405f-804e-725fcf29339e)
+![Screenshot_1746030503](https://github.com/user-attachments/assets/f31a9ef0-2a8d-45f6-ab2a-c4a77de48a78)
+![Screenshot_1746030498](https://github.com/user-attachments/assets/7b33aa70-2d14-4862-9b0e-2454e95ef490)
+![Screenshot_1746030489](https://github.com/user-attachments/assets/0f19e8a1-af9b-469b-9f42-6095b902a54d)
+![Screenshot_1746030467](https://github.com/user-attachments/assets/2defe489-32b1-4dcb-84d4-5b91aa7f7874)
+
