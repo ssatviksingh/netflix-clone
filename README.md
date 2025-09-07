@@ -1,5 +1,6 @@
 🎬 Netflix Clone App : A responsive and modern Netflix clone streaming app built with a user-friendly UI and seamless video experience.
 <br>
+
 🚀 Features
 
 ✅ Browse trending movies and TV shows
@@ -17,9 +18,13 @@
 <br>
 🛠️ Tech Stack
 Frontend: React Native / Expo
+
 API: TMDb API (The Movie Database)
+
 Styling: Tailwind CSS (for web) or styled-components (for React Native)
+
 Video Player: Expo Video / React Native Video
+
 Navigation: React Navigation
 <br>
 
