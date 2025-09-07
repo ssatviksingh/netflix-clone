@@ -1,6 +1,6 @@
 🎬 Netflix Clone App
 A responsive and modern Netflix clone streaming app built with a user-friendly UI and seamless video experience.
-
+<br>
 🚀 Features
 
 ✅ Browse trending movies and TV shows
@@ -14,7 +14,7 @@ A responsive and modern Netflix clone streaming app built with a user-friendly U
 ✅ Dark mode interface
 
 ✅ Movie details page
-
+<br>
 🛠️ Tech Stack
 Frontend: React Native / Expo
 
@@ -25,10 +25,9 @@ Styling: Tailwind CSS (for web) or styled-components (for React Native)
 Video Player: Expo Video / React Native Video
 
 Navigation: React Navigation
-
+<br>
 
 📦Installation
-
 bash-
 git clone https://github.com/ssatviksingh/netflix-clone.git
 
@@ -37,6 +36,7 @@ cd netflix-clone
 npm install
 
 npx expo start
+<br>
 
 🔑 API Key Setup
 1)Create a free account at TMDb.
@@ -46,6 +46,7 @@ npx expo start
 3)Create a .env file in the root directory:
 
 -TMDB_API_KEY=your_tmdb_api_key_here
+<br>
 
 🖼️ Screenshots
 ![Screenshot_1746030552](https://github.com/user-attachments/assets/a7b43da6-d7b5-493b-ae4a-0d68afece543)
@@ -58,3 +59,4 @@ npx expo start
 ![Screenshot_1746030489](https://github.com/user-attachments/assets/0f19e8a1-af9b-469b-9f42-6095b902a54d)
 ![Screenshot_1746030467](https://github.com/user-attachments/assets/2defe489-32b1-4dcb-84d4-5b91aa7f7874)
 
+<br>
