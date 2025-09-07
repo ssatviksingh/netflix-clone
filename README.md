@@ -1,6 +1,6 @@
-🎬 Netflix Clone App
+🎬 Netflix Clone App :
 <br>
-A responsive and modern Netflix clone streaming app built with a user-friendly UI and seamless video experience.
+  A responsive and modern Netflix clone streaming app built with a user-friendly UI and seamless video experience.
 <br>
 🚀 Features
 
