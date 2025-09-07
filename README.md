@@ -26,8 +26,8 @@ Styling: Tailwind CSS (for web) or styled-components (for React Native)
 Video Player: Expo Video / React Native Video
 
 Navigation: React Navigation
-<br>
 
+<br>
 📦Installation
 bash-
 git clone https://github.com/ssatviksingh/netflix-clone.git
@@ -37,8 +37,8 @@ cd netflix-clone
 npm install
 
 npx expo start
-<br>
 
+<br>
 🔑 API Key Setup
 1)Create a free account at TMDb.
 
